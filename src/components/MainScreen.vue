@@ -1,7 +1,10 @@
 <template>
   <div class="flex items-center justify-center h-screen">
     <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-      <h1 class="text-2xl font-bold mb-6 text-center">Password Manager</h1>
+      <div class="flex flex-col items-center gap-1 mb-4">
+        <h1 class="text-2xl font-bold text-center">Lockity</h1>
+        <span class="text-lg font-normal">Open your vault or create new one</span>
+      </div>
       <template v-if="!createVaultForm">
         <div class="flex flex-col gap-2" v-if="!isVaultLoaded">
           <button
@@ -28,7 +31,7 @@
             <button
               class="w-full from-[#3f68d3] to-[#b397e1] bg-gradient-to-r hover:shadow-lg hover:scale-110 text-white font-bold py-2 px-4 rounded-lg"
               @click="logout">
-              Exit
+              Cancel
             </button>
           </div>
         </div>
@@ -49,7 +52,7 @@
           </button>
           <button @click="createVaultForm = false; error = null"
             class="w-full from-[#3f68d3] to-[#b397e1] bg-gradient-to-r hover:shadow-lg hover:scale-110 text-white font-bold py-2 px-4 rounded-lg">
-            Back
+            Cancel
           </button>
         </div>
       </div>

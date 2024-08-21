@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, shell, ipcMain, dialog, clipboard } from 'electron'
+import { app, BrowserWindow, Menu, shell, ipcMain, dialog, clipboard, IpcMainInvokeEvent } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -47,8 +47,10 @@ const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: 'Main window',
-    icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
+    title: 'Lockity',
+    icon: path.join(process.env.VITE_PUBLIC, 'favicon.png'),
+    'minHeight': 400,
+    'minWidth': 325,
     webPreferences: {
       preload,
       contextIsolation: true,
@@ -107,27 +109,32 @@ app.on('activate', () => {
 });
 
 let vaultFilePath = '';
-ipcMain.handle('copy-to-clipboard', async (event, string) => {
-  if (typeof string !== 'string') {
-    throw new Error('Trying to write non string value to clipboard!');
-  }
+ipcMain.handle('copy-to-clipboard', async (event, string: string) => {
   clipboard.writeText(string);
   dialog.showMessageBox(win, {
-    message: 'Coppied to clipboard',
+    message: 'Coppied to clipboard. It will be cleared in 15 seconds!',
     type: 'warning'
   });
 
   setTimeout(() => {
     clipboard.clear();
     console.log('Clipboard is cleared!')
-  }, 15000)
+  }, 15000);
 });
 
 
 ipcMain.handle('vault-open', async () => {
   console.log(vaultFilePath)
   try {
-    const result = await dialog.showOpenDialog({ properties: ['openFile'] });
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [
+        {
+          name: 'Niblod Password Manager Database',
+          extensions: ['npmdb']
+        }
+      ]
+    });
     console.log(result)
 
     if (result && result.filePaths && result.filePaths[0]) {
@@ -135,11 +142,11 @@ ipcMain.handle('vault-open', async () => {
 
       return { success: true };
     } else {
-
+      return { success: false };
     }
   } catch (error) {
     console.error("Error checking vault existence:", error);
-    return false;
+    return { success: false };
   }
 });
 
@@ -154,19 +161,24 @@ ipcMain.handle('vault-exists', async () => {
 });
 
 
-ipcMain.handle('create-vault', async (event, password) => {
+ipcMain.handle('create-vault', async (event: IpcMainInvokeEvent, password: string) => {
   try {
     const encryptionKey = generateKeyFromPassword(password);
-    const initialData = []; 
+    const initialData = [];
 
-    
     await keytar.setPassword('password-manager', 'decryption-key', encryptionKey.toString('hex'));
 
-    
+
     const encryptedData = encryptData(initialData, encryptionKey);
 
     const { canceled, filePath: savePath } = await dialog.showSaveDialog({
-      defaultPath: 'vault.enc'
+      defaultPath: 'vault.npmdb',
+      filters: [
+        {
+          name: 'Niblod Password Manager Database',
+          extensions: ['npmdb']
+        }
+      ]
     });
 
     if (canceled) {
@@ -201,7 +213,7 @@ ipcMain.handle('unlock-vault', async (event, password) => {
     const fileContent = fs.readFileSync(vaultFilePath, 'utf8').trim();
     const decryptedData = decryptData(fileContent, encryptionKey);
 
-    
+
     await keytar.setPassword('password-manager', 'decryption-key', encryptionKey.toString('hex'));
 
     const services = decryptedData.map(entry => ({ service: entry.service }));
@@ -215,7 +227,7 @@ ipcMain.handle('unlock-vault', async (event, password) => {
 
 ipcMain.handle('get-service-info', async (event, serviceName) => {
   try {
-    
+
     const encryptionKeyHex = await keytar.getPassword('password-manager', 'decryption-key');
     if (!encryptionKeyHex) throw new Error("Decryption key not found");
 
@@ -256,7 +268,7 @@ ipcMain.handle('get-password', async (event, serviceName, password) => {
 
 ipcMain.handle('add-password', async (event, passwordData) => {
   try {
-    
+
     const encryptionKeyHex = await keytar.getPassword('password-manager', 'decryption-key');
     if (!encryptionKeyHex) throw new Error("Decryption key not found");
 
@@ -284,7 +296,7 @@ ipcMain.handle('add-password', async (event, passwordData) => {
 
 ipcMain.handle('delete-password', async (event, serviceName) => {
   try {
-    
+
     const encryptionKeyHex = await keytar.getPassword('password-manager', 'decryption-key');
     if (!encryptionKeyHex) throw new Error("Decryption key not found");
 

@@ -1,5 +1,5 @@
 {
-  "name": "password-manager",
+  "name": "lockiti",
   "version": "1.0.0",
   "main": "dist-electron/main/index.js",
   "description": "Really simple password manager",

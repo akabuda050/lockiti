@@ -14,11 +14,18 @@
       <div :class="selectedServiceDetails ? 'hidden md:flex md:w-2/5' : 'w-full md:w-2/5'"
         class="flex flex-col h-full  bg-gray-100 p-4">
         <div class="flex flex-col gap-2 mb-4">
-          <h2 class="text-xl font-medium">Saved Services</h2>
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-medium">Saved Services</h2>
+            <!-- Кнопка для відкриття модального вікна -->
+            <button v-if="!selectedServiceDetails" @click="openAddPasswordModal"
+              class="bg-blue-600 text-white rounded-full px-4 py-2 shadow-lg md:hidden">
+              +
+            </button>
+          </div>
           <input v-model="search" type="text" placeholder="Search Service"
             class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
         </div>
-        <div class="bg-gray-50 overflow-y-auto p-4 rounded-lg shadow-md">
+        <div class="h-full overflow-y-auto p-4 bg-gray-50 rounded-lg shadow-md">
           <ul class="space-y-4">
             <li v-for="service in servicesComputed" :key="service.service" @click="selectService(service.service)"
               class="flex justify-between items-center space-x-2 p-4 rounded-lg shadow-sm hover:shadow-md hover:cursor-pointer w-full bg-white  hover:bg-violet-300">
@@ -158,18 +165,12 @@
         </div>
       </div>
     </div>
-
-    <!-- Кнопка для відкриття модального вікна -->
-    <button v-if="!selectedServiceDetails" @click="openAddPasswordModal"
-      class="fixed bottom-4 right-4 bg-blue-600 text-white rounded-full px-4 py-2 shadow-lg md:hidden">
-      +
-    </button>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { usePasswordGenerator } from '../hooks/usePasswordGenerator'; 
+import { usePasswordGenerator } from '../hooks/usePasswordGenerator';
 
 const emit = defineEmits(['logout']);
 
@@ -200,7 +201,7 @@ const formError = ref('');
 const listError = ref('');
 
 onMounted(async () => {
-  const response = await window.vaultAPI.unlockVault(); 
+  const response = await window.vaultAPI.unlockVault();
   if (response.success) {
     services.value = response.data;
   } else {
@@ -231,7 +232,7 @@ const addPassword = async () => {
     password: newEntry.value.password,
   };
 
-  const response = await window.vaultAPI.addPassword(passwordData);
+  const response = await window.vaultAPI.addEntry(passwordData);
   if (response.success) {
     services.value.push({ service: newEntry.value.service });
     closeAddPasswordModal();
@@ -263,7 +264,7 @@ const updatePassword = async () => {
     password: selectedServiceDetails.value.password,
   };
 
-  const response = await window.vaultAPI.addPassword(passwordData);
+  const response = await window.vaultAPI.addEntry(passwordData);
   if (!response.success) {
     formError.value = response.error;
     console.error(response.error);
@@ -271,7 +272,7 @@ const updatePassword = async () => {
 };
 
 const deleteService = async (serviceName) => {
-  const response = await window.vaultAPI.deletePassword(serviceName);
+  const response = await window.vaultAPI.deleteEntry(serviceName);
   if (response.success) {
     services.value = services.value.filter((service) => service.service !== serviceName);
     selectedServiceDetails.value = null;
