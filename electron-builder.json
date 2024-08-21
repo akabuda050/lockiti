@@ -4,8 +4,7 @@
   "asar": true,
   "productName": "Lockiti",
   "directories": {
-    "output": "release/${version}",
-    "buildResources": "build"
+    "output": "release/${version}"
   },
   "files": [
     "dist",
@@ -15,7 +14,8 @@
     "target": [
       "dmg"
     ],
-    "artifactName": "${productName}-${version}.${ext}"
+    "artifactName": "${productName}-${version}.${ext}",
+    "icon": "public/icon.png"
   },
   "win": {
     "target": [
@@ -26,7 +26,8 @@
         ]
       }
     ],
-    "artifactName": "${productName}-${version}.${ext}"
+    "artifactName": "${productName}-${version}.${ext}",
+    "icon": "public/icon.png"
   },
   "nsis": {
     "oneClick": false,
@@ -38,6 +39,7 @@
     "target": [
       "zip"
     ],
-    "artifactName": "${productName}-${version}.${ext}"
+    "artifactName": "${productName}-${version}.${ext}",
+    "icon": "public/icon.png"
   }
 }
