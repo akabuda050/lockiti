@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('vaultAPI', {
   getEntry: (serviceName: string) => ipcRenderer.invoke('get-entry', serviceName),
 
 
-  createEntry: (passwordData: string) => ipcRenderer.invoke('add-entry', passwordData),
+  createEntry: (passwordData: string) => ipcRenderer.invoke('create-entry', passwordData),
 
 
   deleteEntry: (serviceName: string) => ipcRenderer.invoke('delete-entry', serviceName),

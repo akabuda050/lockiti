@@ -232,7 +232,7 @@ const addPassword = async () => {
     password: newEntry.value.password,
   };
 
-  const response = await window.vaultAPI.addEntry(passwordData);
+  const response = await window.vaultAPI.createEntry(passwordData);
   if (response.success) {
     services.value.push({ service: newEntry.value.service });
     closeAddPasswordModal();
@@ -264,7 +264,7 @@ const updatePassword = async () => {
     password: selectedServiceDetails.value.password,
   };
 
-  const response = await window.vaultAPI.addEntry(passwordData);
+  const response = await window.vaultAPI.createEntry(passwordData);
   if (!response.success) {
     formError.value = response.error;
     console.error(response.error);

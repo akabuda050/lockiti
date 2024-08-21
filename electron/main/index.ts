@@ -87,7 +87,7 @@ app.whenReady().then(createWindow)
 app.on('window-all-closed', () => {
   win = null;
   vaultFilePath = '';
-  keytar.deletePassword('password-manager', 'decryption-key');
+  keytar.deletePassword('lockiti', 'decryption-key');
   if (process.platform !== 'darwin') app.quit()
 })
 
@@ -124,18 +124,16 @@ ipcMain.handle('copy-to-clipboard', async (event, string: string) => {
 
 
 ipcMain.handle('vault-open', async () => {
-  console.log(vaultFilePath)
   try {
     const result = await dialog.showOpenDialog({
       properties: ['openFile'],
       filters: [
         {
-          name: 'Niblod Password Manager Database',
-          extensions: ['npmdb']
+          name: 'Lockity Vault',
+          extensions: ['lockity']
         }
       ]
     });
-    console.log(result)
 
     if (result && result.filePaths && result.filePaths[0]) {
       vaultFilePath = result.filePaths[0];
@@ -166,17 +164,17 @@ ipcMain.handle('create-vault', async (event: IpcMainInvokeEvent, password: strin
     const encryptionKey = generateKeyFromPassword(password);
     const initialData = [];
 
-    await keytar.setPassword('password-manager', 'decryption-key', encryptionKey.toString('hex'));
+    await keytar.setPassword('lockiti', 'decryption-key', encryptionKey.toString('hex'));
 
 
     const encryptedData = encryptData(initialData, encryptionKey);
 
     const { canceled, filePath: savePath } = await dialog.showSaveDialog({
-      defaultPath: 'vault.npmdb',
+      defaultPath: 'vault.lockity',
       filters: [
         {
-          name: 'Niblod Password Manager Database',
-          extensions: ['npmdb']
+          name: 'Lockity Vault',
+          extensions: ['lockity']
         }
       ]
     });
@@ -202,19 +200,19 @@ ipcMain.handle('unlock-vault', async (event, password) => {
     let encryptionKey = null
 
     if (!password) {
-      const encryptionKeyHex = await keytar.getPassword('password-manager', 'decryption-key');
+      const encryptionKeyHex = await keytar.getPassword('lockiti', 'decryption-key');
       if (!encryptionKeyHex) return
       encryptionKey = Buffer.from(encryptionKeyHex, 'hex');
     } else {
       encryptionKey = generateKeyFromPassword(password);
-      await keytar.setPassword('password-manager', 'decryption-key', encryptionKey.toString('hex'));
+      await keytar.setPassword('lockiti', 'decryption-key', encryptionKey.toString('hex'));
     }
 
     const fileContent = fs.readFileSync(vaultFilePath, 'utf8').trim();
     const decryptedData = decryptData(fileContent, encryptionKey);
 
 
-    await keytar.setPassword('password-manager', 'decryption-key', encryptionKey.toString('hex'));
+    await keytar.setPassword('lockiti', 'decryption-key', encryptionKey.toString('hex'));
 
     const services = decryptedData.map(entry => ({ service: entry.service }));
     return { success: true, data: services };
@@ -228,7 +226,7 @@ ipcMain.handle('unlock-vault', async (event, password) => {
 ipcMain.handle('get-service-info', async (event, serviceName) => {
   try {
 
-    const encryptionKeyHex = await keytar.getPassword('password-manager', 'decryption-key');
+    const encryptionKeyHex = await keytar.getPassword('lockiti', 'decryption-key');
     if (!encryptionKeyHex) throw new Error("Decryption key not found");
 
     const encryptionKey = Buffer.from(encryptionKeyHex, 'hex');
@@ -246,9 +244,9 @@ ipcMain.handle('get-service-info', async (event, serviceName) => {
 });
 
 
-ipcMain.handle('get-password', async (event, serviceName, password) => {
+ipcMain.handle('get-entry', async (event, serviceName, password) => {
   try {
-    const encryptionKeyHex = await keytar.getPassword('password-manager', 'decryption-key');
+    const encryptionKeyHex = await keytar.getPassword('lockiti', 'decryption-key');
     if (!encryptionKeyHex) throw new Error("Decryption key not found");
 
     const encryptionKey = Buffer.from(encryptionKeyHex, 'hex');
@@ -266,10 +264,10 @@ ipcMain.handle('get-password', async (event, serviceName, password) => {
 });
 
 
-ipcMain.handle('add-password', async (event, passwordData) => {
+ipcMain.handle('create-entry', async (event, passwordData) => {
   try {
 
-    const encryptionKeyHex = await keytar.getPassword('password-manager', 'decryption-key');
+    const encryptionKeyHex = await keytar.getPassword('lockiti', 'decryption-key');
     if (!encryptionKeyHex) throw new Error("Decryption key not found");
 
     const encryptionKey = Buffer.from(encryptionKeyHex, 'hex');
@@ -294,10 +292,10 @@ ipcMain.handle('add-password', async (event, passwordData) => {
 });
 
 
-ipcMain.handle('delete-password', async (event, serviceName) => {
+ipcMain.handle('delete-entry', async (event, serviceName) => {
   try {
 
-    const encryptionKeyHex = await keytar.getPassword('password-manager', 'decryption-key');
+    const encryptionKeyHex = await keytar.getPassword('lockiti', 'decryption-key');
     if (!encryptionKeyHex) throw new Error("Decryption key not found");
 
     const encryptionKey = Buffer.from(encryptionKeyHex, 'hex');
@@ -319,7 +317,7 @@ ipcMain.handle('delete-password', async (event, serviceName) => {
 
 ipcMain.handle('logout', async () => {
   try {
-    await keytar.deletePassword('password-manager', 'decryption-key');
+    await keytar.deletePassword('lockiti', 'decryption-key');
     vaultFilePath = '';
     return { success: true };
   } catch (error) {
