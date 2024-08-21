@@ -2,7 +2,7 @@
   <div class="flex items-center justify-center h-screen">
     <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
       <div class="flex flex-col items-center gap-1 mb-4">
-        <h1 class="text-2xl font-bold text-center">Lockity</h1>
+        <h1 class="text-2xl font-bold text-center">Lockiti</h1>
         <span class="text-lg font-normal">Open your vault or create new one</span>
       </div>
       <template v-if="!createVaultForm">

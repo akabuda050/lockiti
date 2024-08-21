@@ -47,7 +47,7 @@ const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: 'Lockity',
+    title: 'Lockiti',
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.png'),
     'minHeight': 400,
     'minWidth': 325,
@@ -129,8 +129,8 @@ ipcMain.handle('vault-open', async () => {
       properties: ['openFile'],
       filters: [
         {
-          name: 'Lockity Vault',
-          extensions: ['lockity']
+          name: 'Lockiti Vault',
+          extensions: ['lockiti']
         }
       ]
     });
@@ -170,11 +170,11 @@ ipcMain.handle('create-vault', async (event: IpcMainInvokeEvent, password: strin
     const encryptedData = encryptData(initialData, encryptionKey);
 
     const { canceled, filePath: savePath } = await dialog.showSaveDialog({
-      defaultPath: 'vault.lockity',
+      defaultPath: 'vault.lockiti',
       filters: [
         {
-          name: 'Lockity Vault',
-          extensions: ['lockity']
+          name: 'Lockiti Vault',
+          extensions: ['lockiti']
         }
       ]
     });
